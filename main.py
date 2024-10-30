@@ -21,19 +21,19 @@ class productos():
     def __init__(self):
         self.id = int()
 
-def gen_conv_KNN(conv: List[Tuple[str, str]], veto: List[productos]) -> str:
+def gen_conv_KNN(conv: List[str], veto: List[productos]) -> str:
     prompt = "Necesidades:\ncliente: "
     usuario = True
-    for x in conv:
-        if usuario:
-            prompt += "Cliente: " + x + "\n"
-            usuario = False
+    for i, x in enumerate(conv):
+        if i % 2 == 0:
+            prompt += "Farmacéutico: " + x + "\n"
         else:
-            prompt += "Farmacéutico " + x + "\n"
+            prompt += "IA: " + x + "\n"
+
     if len(veto) > 0:
         prompt += "\nProductos vetados:\n"
         for producto in veto:
-            prompt += f"- Producto ID: {producto.nombre}\n"
+            prompt += f"- Producto ID: {producto}\n"
     return prompt
 
 def query_template(data):

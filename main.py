@@ -35,8 +35,8 @@ def gen_conv_KNN(conv: List[str], veto: List[productos]) -> str:
             prompt += f"- Producto ID: {producto}\n"
     return prompt
 
-def query_template(data):
-    return "with VectorSearchResults AS (SELECT base.id, distance FROM VECTOR_SEARCH(TABLE DataHub.embeddings_cervantes,'embed', ((select " + data + " as embed)),top_k => 5,distance_type => 'COSINE')) SELECT search.id, search.distance, DC.nombre_material, DC.txt_mas_informacion_del_producto, DC.ids_imagenes, concat('nombre ', ifnull(DC.nombre_material,''),'.Nombre_largo ', ifnull(DC.nombre_material_largo,''),'.Marca propia ', DC.es_marca_propia,'.Nombre proveedor ', ifnull(DC.nombre_proveedor,''),'.Nombres matrículas: ',ifnull(DC.nombre_matricula_nivel0,''), ', ',ifnull(DC.nombre_matricula_nivel1,''), ', ',ifnull(DC.nombre_matricula_nivel2,''), ', ',ifnull(DC.nombre_matricula_nivel3,''), ', ',ifnull(DC.nombre_matricula_nivel4,''), ', ',ifnull(DC.nombre_matricula_nivel5,''),'. Información ', ifnull(DC.txt_mas_informacion_del_producto,''),'. Instrucciones ', ifnull(DC.txt_instrucciones_de_uso,''),'. Composición ', ifnull(DC.txt_composicion,'')) AS content FROM DataHub.Datos_Cofares AS DC JOIN  VectorSearchResults AS search ON DC.codigo_material = search.id"
+def query_template(data, veto):
+    return "with VectorSearchResults AS (SELECT base.id, distance FROM VECTOR_SEARCH(TABLE DataHub.embeddings_cervantes,'embed', ((select " + data + " as embed)),top_k => " + veto + ",distance_type => 'COSINE')) SELECT search.id, search.distance, DC.nombre_material, DC.txt_mas_informacion_del_producto, DC.ids_imagenes, concat('nombre ', ifnull(DC.nombre_material,''),'.Nombre_largo ', ifnull(DC.nombre_material_largo,''),'.Marca propia ', DC.es_marca_propia,'.Nombre proveedor ', ifnull(DC.nombre_proveedor,''),'.Nombres matrículas: ',ifnull(DC.nombre_matricula_nivel0,''), ', ',ifnull(DC.nombre_matricula_nivel1,''), ', ',ifnull(DC.nombre_matricula_nivel2,''), ', ',ifnull(DC.nombre_matricula_nivel3,''), ', ',ifnull(DC.nombre_matricula_nivel4,''), ', ',ifnull(DC.nombre_matricula_nivel5,''),'. Información ', ifnull(DC.txt_mas_informacion_del_producto,''),'. Instrucciones ', ifnull(DC.txt_instrucciones_de_uso,''),'. Composición ', ifnull(DC.txt_composicion,'')) AS content FROM DataHub.Datos_Cofares AS DC JOIN  VectorSearchResults AS search ON DC.codigo_material = search.id"
 
 def get_image_from_storage(image_id: str) -> str:
     try:
@@ -87,7 +87,7 @@ def buscar_cercanos(data, veto: List[str]) -> Tuple[List[dict], str]:
     client = bigquery.Client()
     embeddings = embedding_model.get_embeddings([data])
 
-    emb = query_template(str(embeddings[0].values))
+    emb = query_template(str(embeddings[0].values), str(len(veto)))
     query_job = client.query(emb)
     df = query_job.result().to_dataframe()
 

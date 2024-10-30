@@ -23,7 +23,6 @@ class productos():
 
 def gen_conv_KNN(conv: List[str], veto: List[productos]) -> str:
     prompt = "Necesidades:\ncliente: "
-    usuario = True
     for i, x in enumerate(conv):
         if i % 2 == 0:
             prompt += "Farmacéutico: " + x + "\n"
